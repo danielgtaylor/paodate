@@ -95,9 +95,9 @@ class Date(object):
             >>> d.datetime
             datetime.datetime(1981, 2, 13, 11, 17, 36)
             >>> d > Date(12345)
-            False
-            >>> d < Date(12345)
             True
+            >>> d < Date(12345)
+            False
         
     """
     def __init__(self, dt = None, years_ago = 0, months_ago = 0, days_ago = 0,
@@ -177,6 +177,26 @@ class Date(object):
             @return: The modified date object
         """
         return Date(self.dt.__add__(value))
+    
+    def __cmp__(self, value):
+        """
+            Compare this date object to another date object.
+            
+                >>> Date(12345) > Date(1234)
+                True
+                >>> Date(12345) < Date(1234)
+                False
+                >>> Date(12345) == Date(12345)
+                True
+            
+            @rtype: int
+            @return: -1 if it is smaller, 0 if they are equal, 1 if it is
+                     greater than the other date object
+        """
+        if type(value) == Date:
+            return cmp(self.dt, value.dt)
+        else:
+            raise TypeError("Invalid type!")
     
     def _get_datetime(self):
         """
