@@ -101,7 +101,8 @@ class Date(object):
         
     """
     def __init__(self, dt = None, years_ago = 0, months_ago = 0, days_ago = 0,
-                 hours_ago = 0, minutes_ago = 0, seconds_ago = 0):
+                 hours_ago = 0, minutes_ago = 0, seconds_ago = 0,
+                 format = None):
         """
             Create a new Date object, optionally passing in a timestamp, date or 
             datetime object to set the date/time from. If it is not given then 
@@ -111,14 +112,16 @@ class Date(object):
                 Date(2009-02-14, 00:31:30)
                 >>> Date((2009, 2, 14))
                 Date(2009-02-14, 00:00:00)
+                >>> Date("2009-02-14", format = "%Y-%m-%d")
+                Date(2009-02-14, 00:00:00)
                 >>> Date(date(2009, 10, 2))
                 Date(2009-10-02, 00:00:00)
                 >>> Date(datetime(2007, 3, 24))
                 Date(2007-03-24, 00:00:00)
             
-            @type dt: timestamp, tuple, date, or datetime
+            @type dt: timestamp, string, tuple, date, or datetime
             @param dt: Date/time to set; if None the current date/time will
-                       be set.
+                       be set. If it is a string then format must also be set!
             @type years_ago: int
             @param years_ago: The number of years ago from dt to set the date
             @type months_ago: int
@@ -133,12 +136,16 @@ class Date(object):
             @type seconds_ago: int
             @param seconds_ago: The number of seconds ago from dt to set the
                                 date
+            @type format: str
+            @param format: The format to pass to strptime if dt is a string.
             @raise ValueError: If dt is not an int, date, or datetime object
         """
         if dt is None:
             self.dt = datetime.now()
         elif type(dt) in [float, int, long]:
             self.dt = datetime.fromtimestamp(dt)
+        elif type(dt) in [str, unicode]:
+            self.dt = datetime.strptime(dt, format)
         elif type(dt) in [list, tuple]:
             self.dt = datetime(*dt)
         elif type(dt) is date:
