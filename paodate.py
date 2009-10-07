@@ -145,6 +145,9 @@ class Date(object):
         elif type(dt) in [float, int, long]:
             self.dt = datetime.fromtimestamp(dt)
         elif type(dt) in [str, unicode]:
+            if format is None:
+                raise ValueError("When passing in a string you must also " \
+                                 "pass in a format description!")
             self.dt = datetime.strptime(dt, format)
         elif type(dt) in [list, tuple]:
             self.dt = datetime(*dt)
