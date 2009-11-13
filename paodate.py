@@ -56,7 +56,7 @@ import calendar
 import time
  
 from datetime import datetime, date, timedelta
-from dateutil.relativedelta import relativedelta
+from contrib.relativedelta import relativedelta
  
 class Date(object):
     """
@@ -664,6 +664,36 @@ class Date(object):
         return Date(datetime(tuple[0], tuple[1], tuple[2], 23, 59, 59, 999999))
     
     @property
+    def start_of_week(self):
+        """
+            Get the start date/time of this week.
+            
+                >>> Date(1234567890).start_of_week
+                Date(2009-02-09, 00:00:00)
+            
+            @rtype: Date
+            @return: A new date set to the beginning of this week
+        """
+        d = self.start_of_day
+        d.day -= d.dt.weekday()
+        return d
+    
+    @property
+    def end_of_week(self):
+        """
+            Get the end date/time of this week.
+            
+                >>> Date(1234567890).end_of_week
+                Date(2009-02-15, 23:59:59)
+            
+            @rtype: Date
+            @return: A new date set to the end of this week
+        """
+        d = self.end_of_day
+        d.day += (6 - d.dt.weekday())
+        return d
+    
+    @property
     def start_of_month(self):
         """
             Get the start date/time of this month.
@@ -732,6 +762,20 @@ class Date(object):
             @return: (start, end) dates of the current day
         """
         return (self.start_of_day, self.end_of_day)
+    
+    @property
+    def week_tuple(self):
+        """
+            Get a tuple of two L{Date}s representing the start and end of this
+            week.
+            
+                >>> Date(1234567890).week_tuple
+                (Date(2009-02-09, 00:00:00), Date(2009-02-15, 23:59:59))
+            
+            @rtype: tuple
+            @return: (start, end) dates of the current week
+        """
+        return (self.start_of_week, self.end_of_week)
     
     @property
     def month_tuple(self):
