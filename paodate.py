@@ -35,9 +35,9 @@
 
     Requirements
     ------------
-    This module requires Python and the dateutil module. To run all tests
-    and make sure everything works for you installation please run this module
-    as a script, which will invoke the unit tests.
+    The only requirement for this module is Python. Running this script will
+    invoke all unit tests so you can see that everything works for your
+    installation.
 
     Authors & Contributors
     ----------------------
@@ -102,7 +102,7 @@ class Date(object):
     """
     def __init__(self, dt = None, years_ago = 0, months_ago = 0, days_ago = 0,
                  hours_ago = 0, minutes_ago = 0, seconds_ago = 0,
-                 format = None):
+                 format = None, utc = False):
         """
             Create a new Date object, optionally passing in a timestamp, date or 
             datetime object to set the date/time from. If it is not given then 
@@ -119,7 +119,7 @@ class Date(object):
                 >>> Date(datetime(2007, 3, 24))
                 Date(2007-03-24, 00:00:00)
             
-            @type dt: timestamp, string, tuple, date, or datetime
+            @type dt: timestamp, string, tuple, struct_time, date, or datetime
             @param dt: Date/time to set; if None the current date/time will
                        be set. If it is a string then format must also be set!
             @type years_ago: int
@@ -138,6 +138,9 @@ class Date(object):
                                 date
             @type format: str
             @param format: The format to pass to strptime if dt is a string.
+            @type utc: bool
+            @param utc: If dt is None and utc is True, sets the date to 
+                        datetime.utcnow instead of datetime.now
             @raise ValueError: If dt is not an int, date, or datetime object
         """
         if dt is None:
@@ -151,6 +154,9 @@ class Date(object):
             self.dt = datetime.strptime(dt, format)
         elif type(dt) in [list, tuple]:
             self.dt = datetime(*dt)
+        elif type(dt) is time.struct_time:
+            self.dt = datetime(dt.tm_year, dt.tm_mon, dt.tm_mday, dt.tm_hour, 
+                               dt.tm_min, dt.tm_sec)
         elif type(dt) is date:
             self.dt = datetime.combine(dt, datetime.min.time())
         elif type(dt) is datetime:
@@ -163,6 +169,9 @@ class Date(object):
         for time_ago in ["years_ago", "months_ago", "days_ago", "hours_ago",
                          "minutes_ago", "seconds_ago"]:
             exec("self.%s -= %s" % (time_ago.split("_")[0][:-1], time_ago))
+        
+        if utc:
+            self.dt = self.utc.dt
  
     def __repr__(self):
         """
@@ -597,12 +606,26 @@ class Date(object):
                 >>> d = Date(1234567890)
                 >>> d.microsecond = 250
             
-            @type value: int
+            @rtype value: int
             @param value: The microsecond to set
         """
         self.dt += timedelta(microseconds = value - self.dt.microsecond)
     
     microsecond = property(_get_microsecond, _set_microsecond)
+    
+    @property
+    def utc(self):
+        """
+            Get a UTC version of this Date object.
+            
+                >>> d = Date(1234567890)
+                >>> d.utc
+                Date(2009-02-13, 23:31:30)
+            
+            @rtype: Date
+            @return: A new UTC Date object
+        """
+        return Date(time.gmtime(self.timestamp))
     
     @property
     def days_in_month(self):
