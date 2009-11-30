@@ -197,6 +197,30 @@ class Date(object):
         """
         return Date(self.dt.__add__(value))
     
+    def __sub__(self, value):
+        """
+            Subtract a time delta or one date from another.
+            
+                >>> d1 = Date(1234567890)
+                >>> d2 = Date(1234567900)
+                >>> delta = d2 - d1
+                >>> delta
+                datetime.timedelta(0, 10)
+                >>> d1
+                Date(2009-02-14, 00:31:30)
+                >>> d1 + delta
+                Date(2009-02-14, 00:31:40)
+            
+            @rtype: Date or timedelta
+            @return: The modified date object or date/time difference
+        """
+        if type(value) is timedelta:
+            return Date(self.dt.__sub__(value))
+        elif type(value) is Date:
+            return self.dt - value.dt
+        else:
+            raise TypeError("Expected Date or timedelta!")
+    
     def __cmp__(self, value):
         """
             Compare this date object to another date object.
