@@ -7,27 +7,10 @@
     accomplished with the new Date object which abstracts most of the 
     differences between datetime, date, time, timedelta, and relativedelta,
     allowing you to convert freely between all of them and providing useful
-    utility methods. Some examples:
-
-        >>> Date(1234567890).datetime
-        datetime.datetime(2009, 2, 14, 0, 31, 30)
-        
-        >>> d = Date(datetime(2004, 1, 12))
-        >>> d.day += 10
-        >>> d
-        Date(2004-01-22, 00:00:00)
-        
-        >>> d.friendly
-        '22 Jan 2004'
-        
-        >>> d.sql
-        "'2004-01-22 00:00:00'"
-        
-        >>> d.month_tuple
-        (Date(2004-01-01, 00:00:00), Date(2004-01-31, 23:59:59))
-
-    Please take a look at the well-documented paodate.py file for more
-    information.
+    utility methods.
+    
+    Please look at the README.rst file included with this project and the
+    source code documentation and examples below for more information.
 
     Usage
     -----
@@ -41,7 +24,10 @@
 
     Authors & Contributors
     ----------------------
-    Daniel G. Taylor <dan@programmer-art.org>
+    Patches are very welcome upstream, so feel free to fork and push your
+    changes back up! The following people have worked on this project:
+
+        * Daniel G. Taylor <dan@programmer-art.org>
 
     License
     -------
@@ -338,7 +324,7 @@ class Date(object):
                                  tm_hour=0, tm_min=31, tm_sec=30, tm_wday=5, 
                                  tm_yday=45, tm_isdst=-1)
             
-            @rtype: tuple
+            @rtype: time.struct_time
             @return: (year, month, day, hour, minute, second, weekday, 
                       year day, is daylight saving)
         """
