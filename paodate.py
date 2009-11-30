@@ -957,6 +957,13 @@ MIN = Date(0)
 MAX = Date(datetime(2038, 1, 1))
 
 if __name__ == "__main__":
+    import os
+    
+    # Set the test time zone so dates aren't off by X hours in your local
+    # time zone.
+    os.environ['TZ'] = 'Europe/Amsterdam'
+    time.tzset()
+    
     # Run unit tests for this module, e.g. via `python date.py` in a shell.
     import doctest
     doctest.testmod()
