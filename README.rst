@@ -117,6 +117,15 @@ can have unintended effects.
     >>> d
     Date(2006-02-19, 00:31:30)
 
+It's also possible to quickly add / subtract all the components except 
+microseconds at once or to daisy-chain such operations:
+
+    >>> d.add(years=-2, days=13, minutes=5)
+    # Subtract two years, add 13 days and 5 minutes
+    
+    >>> d = Date().start_of_month.add(days=-3)
+    # Get the date and time three days before the start of the current month
+
 The number of days in the current month is also built-in:
 
     >>> d.days_in_month

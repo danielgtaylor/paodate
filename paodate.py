@@ -37,7 +37,8 @@
         http://www.python.org/psf/license/
 
 """
- 
+__version__ = "1.1"
+
 import calendar
 import time
  
@@ -152,9 +153,15 @@ class Date(object):
                              "list or tuple, date or datetime object! Got " \
                              "%s instead!" % str(dt))
         
-        for time_ago in ["years_ago", "months_ago", "days_ago", "hours_ago",
-                         "minutes_ago", "seconds_ago"]:
-            exec("self.%s -= %s" % (time_ago.split("_")[0][:-1], time_ago))
+        # Add / subtract time as requested
+        self.add(**{
+            "years": -years_ago,
+            "months": -months_ago,
+            "days": -days_ago,
+            "hours": -hours_ago,
+            "minutes": -minutes_ago,
+            "seconds": -seconds_ago
+        })
         
         if utc:
             self.dt = self.utc.dt
@@ -622,6 +629,16 @@ class Date(object):
         self.dt += timedelta(microseconds = value - self.dt.microsecond)
     
     microsecond = property(_get_microsecond, _set_microsecond)
+    
+    def add(self, years=0, months=0, days=0, hours=0, minutes=0, seconds=0):
+        """
+            Add a number of years, months, days, hours, minutes, or seconds
+            and return the modified Date.
+        """
+        for unit in ["years", "months", "days", "hours", "minutes", "seconds"]:
+            setattr(self, unit[:-1], getattr(self, unit[:-1]) + locals()[unit])
+        
+        return self
     
     @property
     def utc(self):
