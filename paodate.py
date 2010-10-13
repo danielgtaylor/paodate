@@ -14,7 +14,8 @@
 
     Usage
     -----
-    Import the paodate.py file into your project and use the Date object.
+    Import the paodate.py file into your project and use the Date and Delta
+    objects.
 
     Requirements
     ------------
@@ -37,13 +38,460 @@
         http://www.python.org/psf/license/
 
 """
-__version__ = "1.1"
+__version__ = "1.2"
 
 import calendar
 import time
  
 from datetime import datetime, date, timedelta
- 
+
+class Delta(object):
+    """
+        An object representing a difference between date/times. This object
+        has several advantages over Python's built-in timedelta object.
+        
+         * Attributes like years, months, days, minutes, hours, seconds,
+           microseconds
+         * You can easily convert to a timedelta or a number of seconds
+         * Convenience methods, e.g. for human-friendly display
+        
+        Notes:
+        
+         * When dealing with months it is assumed that one month is equal
+           to exactly 30 days. To get an exact number of seconds always use
+           the Delta().total_seconds property.
+         * One year is assumed to be exactly 365 days.
+        
+            >>> d = Delta()
+            >>> str(d)
+            'Delta(0 seconds)'
+            
+            >>> d = Delta(123456)
+            >>> str(d)
+            'Delta(1 day, 10 hours, 17 minutes, 36 seconds)'
+            >>> d.days
+            1
+            >>> d.minutes
+            17
+            >>> d.total_seconds
+            123456.0
+            >>> d.total_hours
+            34.293333333333337
+            
+            >>> delta = Date(12345678) - Date(12340000)
+            >>> str(delta)
+            'Delta(1 hour, 34 minutes, 38 seconds)'
+            
+            >>> d = Date(12345678) + Delta(hours = 2, minutes = 7)
+            >>> str(d)
+            'Date(1970-05-24, 00:28:18)'
+        
+        @type td: timedelta, int, float, long or None
+        @param td: An existing timedelta or number of seconds
+        @type years: int, float, or long
+        @param years: The number of years this delta represents
+        @type months: int, float, or long
+        @param months: The number of months this delta represents
+        @type years: int, float, or long
+        @param years: The number of years this delta represents
+        @type years: int, float, or long
+        @param years: The number of years this delta represents
+        @type years: int, float, or long
+        @param years: The number of years this delta represents
+        @type years: int, float, or long
+        @param years: The number of years this delta represents
+    """
+    def __init__(self, td = None, years = 0, months = 0, days = 0, hours = 0,
+                 minutes = 0, seconds = 0):
+        if td is None:
+            self.td = timedelta()
+        elif type(td) is timedelta:
+            self.td = td
+        elif type(td) in [int, float, long]:
+            self.td = timedelta(seconds=td)
+        else:
+            raise ValueError("You must pass a valid timedelta object, number " \
+                             "of years, months, days, hours, minutes, " \
+                             "seconds, or nothing instead of %s" % td)
+        
+        days = years * 365 + months * 30 + days
+        seconds = hours * 60 * 60 + minutes * 60 + seconds
+        
+        self.td = timedelta(days=self.td.days + days, seconds=self.td.seconds + seconds, microseconds=self.td.microseconds)
+    
+    def __repr__(self):
+        """
+            Return a nice string representation of this delta.
+            
+                >>> str(Delta())
+                'Delta(0 seconds)'
+                
+                >>> str(Delta(months=1, days=2, minutes=3))
+                'Delta(1 month, 2 days, 3 minutes)'
+            
+            @rtype: str
+            @return: String representation of this delta
+        """
+        return "Delta(%s)" % self.friendly
+    
+    @property
+    def timedelta(self):
+        """
+            Get the underlying timedelta object.
+            
+            @rtype: timedelta
+            @return: The underlying timedelta
+        """
+        return self.td
+    
+    @timedelta.setter
+    def timedelta(self, value):
+        """
+            Set the underlying timedelta object.
+            
+            @type value: timedelta
+            @param value: The timedelta object to set
+        """
+        self.td = value
+    
+    @property
+    def friendly(self):
+        """
+            Get a friendly, human-readable representation of this delta.
+            
+                >>> Delta().friendly
+                '0 seconds'
+                
+                >>> Delta(123456).friendly
+                '1 day, 10 hours, 17 minutes, 36 seconds'
+            
+            @rtype: str
+            @return: Friendly string
+        """
+        data = []
+        
+        for attr in ["year", "month", "day", "hour", "minute", "second"]:
+            val = getattr(self, attr + "s")
+            if val:
+                data.append("%d %s" % (val, val == 1 and attr or (attr + "s")))
+        
+        if not data:
+          data.append("0 seconds")
+        
+        return ", ".join(data)
+    
+    @property
+    def microseconds(self):
+        """
+            Get the number of microseconds.
+            
+                >>> d = Date(12345678) - Date(12345670.5)
+                >>> d.microseconds
+                500000
+            
+            @rtype: int
+            @return: Number of microseconds
+        """
+        return self.td.microseconds
+    
+    @microseconds.setter
+    def microseconds(self, value):
+        """
+            Set the number of microseconds.
+            
+                >>> d = Delta()
+                >>> d.microseconds
+                0
+                >>> d.microseconds = 5000
+                >>> d.microseconds
+                5000
+            
+            @type value: int or long
+            @param value: Number of microseconds
+        """
+        value -= self.microseconds
+        self.td = timedelta(seconds=self.total_seconds + (value / 1000000.0))
+    
+    @property
+    def total_microseconds(self):
+        """
+            Get the total number of microseconds in this delta.
+            
+                >>> d = Delta(minutes=3)
+                >>> d.total_microseconds
+                180000000.0
+            
+            @rtype: float
+            @return: Number of microseconds
+        """
+        return float(self.td.days * 24 * 60 * 60 * 1000000 + self.td.seconds * 1000000 + self.td.microseconds)
+    
+    @property
+    def seconds(self):
+        """
+            Get the number of seconds.
+            
+                >>> d = Date(12345678) - Date(12345670.5)
+                >>> d.seconds
+                7
+            
+            @rtype: int
+            @return: Number of seconds
+        """
+        return self.td.seconds % (60 * 60) % 60
+    
+    @seconds.setter
+    def seconds(self, value):
+        """
+            Set the number of seconds.
+            
+                >>> d = Delta()
+                >>> d.seconds
+                0
+                >>> d.seconds += 20
+                >>> d.seconds
+                20
+            
+            @type value: int or long
+            @param value: Number of seconds
+        """
+        value -= self.seconds
+        self.td = timedelta(seconds=self.total_seconds + value)
+    
+    @property
+    def total_seconds(self):
+        """
+            Get the total number of seconds in this delta.
+            
+                >>> d = Delta(minutes=3)
+                >>> d.total_seconds
+                180.0
+            
+            @rtype: float
+            @return: Number of seconds
+        """
+        return self.td.days * 24 * 60 * 60 + self.td.seconds + (self.td.microseconds / 1000000.0)
+    
+    @property
+    def minutes(self):
+        """
+            Get the number of minutes.
+            
+                >>> d = Delta(minutes=10)
+                >>> d.minutes
+                10
+            
+            @rtype: int
+            @return: Number of minutes
+        """
+        return self.td.seconds % (60 * 60) / 60
+    
+    @minutes.setter
+    def minutes(self, value):
+        """
+            Set the number of minutes.
+            
+                >>> d = Delta()
+                >>> d.minutes = 10
+                >>> d.minutes
+                10
+            
+            @type value: int or long
+            @param value: Number of minutes
+        """
+        value -= self.minutes
+        self.td = timedelta(seconds=self.total_seconds + (value * 60.0))
+    
+    @property
+    def total_minutes(self):
+        """
+            Get the total number of minutes in this delta.
+            
+                >>> d = Delta(hours=1.5)
+                >>> d.total_minutes
+                90.0
+            
+            @rtype: float
+            @return: Number of minutes
+        """
+        return self.td.days * 24 * 60 + (self.td.seconds / 60.0) + (self.td.microseconds / 1000000.0 / 60.0)
+    
+    @property
+    def hours(self):
+        """
+            Get the number of hours.
+            
+                >>> d = Delta(hours=3)
+                >>> d.hours
+                3
+            
+            @rtype: int
+            @return: Number of hours
+        """
+        return self.td.seconds / (60 * 60)
+    
+    @hours.setter
+    def hours(self, value):
+        """
+            Set the number of hours.
+            
+                >>> d = Delta(days=1)
+                >>> d.hours -= 1
+                >>> d.hours
+                23
+            
+            @type value: int or long
+            @param value: Number of hours
+        """
+        value -= self.hours
+        self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60.0))
+    
+    @property
+    def total_hours(self):
+        """
+            Get the total number of hours in this delta.
+            
+                >>> d = Delta(days = 1)
+                >>> d.total_hours
+                24.0
+            
+            @rtype: float
+            @return: Number of hours
+        """
+        return self.td.days * 24 + (self.td.seconds / 60.0 / 60.0) + (self.td.microseconds / 1000000.0 / 60.0 / 60.0)
+    
+    @property
+    def days(self):
+        """
+            Get the number of days.
+            
+                >>> d = Delta(days=5)
+                >>> d.days
+                5
+            
+            @rtype: int
+            @return: Number of days
+        """
+        return self.td.days % 365 % 30
+    
+    @days.setter
+    def days(self, value):
+        """
+            Set the number of days.
+            
+                >>> d = Delta()
+                >>> d.days = 5
+                >>> d.days
+                5
+            
+            @type value: int or long
+            @param value: Number of days
+        """
+        value -= self.days
+        self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60 * 24))
+    
+    @property
+    def total_days(self):
+        """
+            Get the total number of days in this delta.
+            
+                >>> d = Delta(months=3)
+                >>> d.total_days
+                90.0
+            
+            @rtype: float
+            @return: Number of days
+        """
+        return self.td.days + (self.td.seconds / 24.0 / 60.0 / 60.0) + (self.td.microseconds / 100000.0 / 60.0 / 60.0 / 24.0)
+    
+    @property
+    def months(self):
+        """
+            Get the number of months.
+            
+                >>> d = Delta(years=0.9)
+                >>> d.months
+                10
+            
+            @rtype: int
+            @return: Number of months
+        """
+        return self.td.days % 365 / 30
+    
+    @months.setter
+    def months(self, value):
+        """
+            Set the number of months.
+            
+                >>> d = Delta()
+                >>> d.months = 7
+                >>> d.months
+                7
+            
+            @type value: int or long
+            @param value: Number of months
+        """
+        value -= self.months
+        self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60 * 24 * 30))
+    
+    @property
+    def total_months(self):
+        """
+            Get the total number of months in this delta.
+            
+                >>> d = Delta(days=90)
+                >>> d.total_months
+                3.0
+            
+            @rtype: float
+            @return: Number of months
+        """
+        return self.td.days / 30.0 + (self.td.seconds / 30.0 / 24.0 / 60.0 / 60.0) + (self.td.microseconds / 1000000.0 / 30.0 / 24.0 / 60.0 / 60.0)
+    
+    @property
+    def years(self):
+        """
+            Get the number of years.
+            
+                >>> d = Delta(years=1)
+                >>> d.years
+                1
+            
+            @rtype: int
+            @return: Number of years
+        """
+        return self.td.days / 365
+    
+    @years.setter
+    def years(self, value):
+        """
+            Set the number of years.
+            
+                >>> d = Delta()
+                >>> d.years = 9
+                >>> d.years
+                9
+            
+            @type value: int or long
+            @param value: Number of years
+        """
+        value -= self.years
+        self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60 * 24 * 365))
+    
+    @property
+    def total_years(self):
+        """
+            Get the total number of years for this delta.
+            
+                >>> d = Delta(days=1095)
+                >>> d.total_years
+                3.0
+            
+            @rtype: float
+            @return: Number of years
+        """
+        return self.td.days / 365.0 + (self.td.seconds / 365.0 / 24.0 / 60.0 / 60.0) + (self.td.microseconds / 1000000.0 / 365.0 / 24.0 / 60.0 / 60.0)
+
 class Date(object):
     """
         An object representing a date and a time. This object has several
@@ -187,6 +635,9 @@ class Date(object):
             @rtype: Date
             @return: The modified date object
         """
+        if type(value) == Delta:
+            value = value.timedelta
+        
         return Date(self.dt.__add__(value))
     
     def __sub__(self, value):
@@ -197,7 +648,7 @@ class Date(object):
                 >>> d2 = Date(1234567900)
                 >>> delta = d2 - d1
                 >>> delta
-                datetime.timedelta(0, 10)
+                Delta(10 seconds)
                 >>> d1
                 Date(2009-02-14, 00:31:30)
                 >>> d1 + delta
@@ -209,7 +660,7 @@ class Date(object):
         if type(value) is timedelta:
             return Date(self.dt.__sub__(value))
         elif type(value) is Date:
-            return self.dt - value.dt
+            return Delta(self.dt - value.dt)
         else:
             raise TypeError("Expected Date or timedelta!")
     

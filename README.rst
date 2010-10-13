@@ -1,7 +1,7 @@
 Pao Date Tools
 ==============
 Utilities for making date and time handling in Python easy. This is mainly
-accomplished with the new Date object which abstracts most of the 
+accomplished with the new Date and Delta objects which abstract most of the 
 differences between datetime, date, time, timedelta, and relativedelta,
 allowing you to convert freely between all of them and providing useful
 utility methods.
@@ -30,6 +30,13 @@ Some quick examples:
     
     >>> d.month_tuple
     (Date(2004-01-01, 00:00:00), Date(2004-01-31, 23:59:59))
+    
+    >>> delta = Date(1234567890) - d
+    >>> delta
+    Delta(5 years, 1 month, 4 days, 23 hours, 31 minutes, 30 seconds)
+    
+    >>> delta.total_seconds
+    160702290.0
 
 Constructors
 ------------
@@ -208,12 +215,44 @@ The following useful representations are built into the Date object:
     >>> d.strftime("%Y-%m-%d")
     '2009-02-14'
 
+Differences Between Dates
+-------------------------
+The following examples show how to use the new Delta object with Date objects:
+
+    >>> d1 = Date(1234567890)
+    >>> d2 = Date(1234560000)
+    >>> delta = d1 - d2
+    >>> delta
+    Delta(2 hours, 11 minutes, 30 seconds)
+    
+    >>> delta.timedelta
+    datetime.timedelta(0, 7890)
+    
+    >>> delta.total_seconds
+    7890.0
+    
+    >>> round(delta.total_hours)
+    2.0
+    
+    >>> delta.friendly
+    '2 hours, 11 minutes, 30 seconds'
+    
+    >>> delta.days = 5
+    >>> delta
+    Delta(5 days, 2 hours, 11 minutes, 30 seconds)
+    
+    >>> d2 + delta
+    Date(2009-02-18, 22:31:30)
+    
+    >>> (d2 + delta) - d1
+    Delta(5 days)
+
 Please take a look at the well-documented paodate.py file for more
 information.
 
 Usage
 -----
-Import the paodate.py file into your project and use the Date object.
+Import the paodate.py file into your project and use the Date and Delta objects.
 
 Requirements
 ------------
