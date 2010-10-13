@@ -659,6 +659,8 @@ class Date(object):
         """
         if type(value) is timedelta:
             return Date(self.dt.__sub__(value))
+        elif type(value) is Delta:
+            return Date(self.dt.__sub__(value.timedelta))
         elif type(value) is Date:
             return Delta(self.dt - value.dt)
         else:

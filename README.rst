@@ -148,14 +148,14 @@ Getting whether this date is in the past or future is easy as well:
     False
 
 Addition and subtraction of Date objects is also somewhat possible. Addition 
-is possible between a Date and datetime.timedelta, and subtraction is possible 
-between Date objects and a Date and a datetime.timedelta:
+is possible between a Date and Delta or datetime.timedelta, and subtraction
+is possible between Date objects and a Date and a Delta or datetime.timedelta:
 
     >>> d = Date(1234567890)
     >>> d2 = Date(1234567900)
     >>> delta = d2 - d
     >>> delta
-    datetime.timedelta(0, 10)
+    Delta(10 seconds)
     >>> d + delta
     Date(2009-02-14, 00:31:40)
 
