@@ -134,8 +134,7 @@ class Delta(object):
         """
         return "Delta(%s)" % self.friendly
     
-    @property
-    def timedelta(self):
+    def _get_timedelta(self):
         """
             Get the underlying timedelta object.
             
@@ -144,8 +143,7 @@ class Delta(object):
         """
         return self.td
     
-    @timedelta.setter
-    def timedelta(self, value):
+    def _set_timedelta(self, value):
         """
             Set the underlying timedelta object.
             
@@ -153,6 +151,8 @@ class Delta(object):
             @param value: The timedelta object to set
         """
         self.td = value
+    
+    timedelta = property(_get_timedelta, _set_timedelta)
     
     @property
     def friendly(self):
@@ -180,8 +180,7 @@ class Delta(object):
         
         return ", ".join(data)
     
-    @property
-    def microseconds(self):
+    def _get_microseconds(self):
         """
             Get the number of microseconds.
             
@@ -194,8 +193,7 @@ class Delta(object):
         """
         return self.td.microseconds
     
-    @microseconds.setter
-    def microseconds(self, value):
+    def _set_microseconds(self, value):
         """
             Set the number of microseconds.
             
@@ -212,6 +210,8 @@ class Delta(object):
         value -= self.microseconds
         self.td = timedelta(seconds=self.total_seconds + (value / 1000000.0))
     
+    microseconds = property(_get_microseconds, _set_microseconds)
+    
     @property
     def total_microseconds(self):
         """
@@ -226,8 +226,7 @@ class Delta(object):
         """
         return float(self.td.days * 24 * 60 * 60 * 1000000 + self.td.seconds * 1000000 + self.td.microseconds)
     
-    @property
-    def seconds(self):
+    def _get_seconds(self):
         """
             Get the number of seconds.
             
@@ -240,8 +239,7 @@ class Delta(object):
         """
         return self.td.seconds % (60 * 60) % 60
     
-    @seconds.setter
-    def seconds(self, value):
+    def _set_seconds(self, value):
         """
             Set the number of seconds.
             
@@ -258,6 +256,8 @@ class Delta(object):
         value -= self.seconds
         self.td = timedelta(seconds=self.total_seconds + value)
     
+    seconds = property(_get_seconds, _set_seconds)
+    
     @property
     def total_seconds(self):
         """
@@ -272,8 +272,7 @@ class Delta(object):
         """
         return self.td.days * 24 * 60 * 60 + self.td.seconds + (self.td.microseconds / 1000000.0)
     
-    @property
-    def minutes(self):
+    def _get_minutes(self):
         """
             Get the number of minutes.
             
@@ -286,8 +285,7 @@ class Delta(object):
         """
         return self.td.seconds % (60 * 60) / 60
     
-    @minutes.setter
-    def minutes(self, value):
+    def _set_minutes(self, value):
         """
             Set the number of minutes.
             
@@ -301,6 +299,8 @@ class Delta(object):
         """
         value -= self.minutes
         self.td = timedelta(seconds=self.total_seconds + (value * 60.0))
+    
+    minutes = property(_get_minutes, _set_minutes)
     
     @property
     def total_minutes(self):
@@ -316,8 +316,7 @@ class Delta(object):
         """
         return self.td.days * 24 * 60 + (self.td.seconds / 60.0) + (self.td.microseconds / 1000000.0 / 60.0)
     
-    @property
-    def hours(self):
+    def _get_hours(self):
         """
             Get the number of hours.
             
@@ -330,8 +329,7 @@ class Delta(object):
         """
         return self.td.seconds / (60 * 60)
     
-    @hours.setter
-    def hours(self, value):
+    def _set_hours(self, value):
         """
             Set the number of hours.
             
@@ -345,6 +343,8 @@ class Delta(object):
         """
         value -= self.hours
         self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60.0))
+    
+    hours = property(_get_hours, _set_hours)
     
     @property
     def total_hours(self):
@@ -360,8 +360,7 @@ class Delta(object):
         """
         return self.td.days * 24 + (self.td.seconds / 60.0 / 60.0) + (self.td.microseconds / 1000000.0 / 60.0 / 60.0)
     
-    @property
-    def days(self):
+    def _get_days(self):
         """
             Get the number of days.
             
@@ -374,8 +373,7 @@ class Delta(object):
         """
         return self.td.days % 365 % 30
     
-    @days.setter
-    def days(self, value):
+    def _set_days(self, value):
         """
             Set the number of days.
             
@@ -389,6 +387,8 @@ class Delta(object):
         """
         value -= self.days
         self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60 * 24))
+    
+    days = property(_get_days, _set_days)
     
     @property
     def total_days(self):
@@ -404,8 +404,7 @@ class Delta(object):
         """
         return self.td.days + (self.td.seconds / 24.0 / 60.0 / 60.0) + (self.td.microseconds / 100000.0 / 60.0 / 60.0 / 24.0)
     
-    @property
-    def months(self):
+    def _get_months(self):
         """
             Get the number of months.
             
@@ -418,8 +417,7 @@ class Delta(object):
         """
         return self.td.days % 365 / 30
     
-    @months.setter
-    def months(self, value):
+    def _set_months(self, value):
         """
             Set the number of months.
             
@@ -433,6 +431,8 @@ class Delta(object):
         """
         value -= self.months
         self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60 * 24 * 30))
+    
+    months = property(_get_months, _set_months)
     
     @property
     def total_months(self):
@@ -448,8 +448,7 @@ class Delta(object):
         """
         return self.td.days / 30.0 + (self.td.seconds / 30.0 / 24.0 / 60.0 / 60.0) + (self.td.microseconds / 1000000.0 / 30.0 / 24.0 / 60.0 / 60.0)
     
-    @property
-    def years(self):
+    def _get_years(self):
         """
             Get the number of years.
             
@@ -462,8 +461,7 @@ class Delta(object):
         """
         return self.td.days / 365
     
-    @years.setter
-    def years(self, value):
+    def _set_years(self, value):
         """
             Set the number of years.
             
@@ -477,6 +475,8 @@ class Delta(object):
         """
         value -= self.years
         self.td = timedelta(seconds=self.total_seconds + (value * 60.0 * 60 * 24 * 365))
+    
+    years = property(_get_years, _set_years)
     
     @property
     def total_years(self):
