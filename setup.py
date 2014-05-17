@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name = "paodate",
-    version = "1.2",
+    version = "1.3",
     description = "Easy object-oriented date and time handling for Python",
     long_description = """Overview
 ========

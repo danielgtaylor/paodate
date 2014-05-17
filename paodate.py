@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
     Pao Date Tools
@@ -29,6 +30,7 @@
     changes back up! The following people have worked on this project:
 
         * Daniel G. Taylor <dan@programmer-art.org>
+        * Nguyễn Hồng Quân <ng.hong.quan@gmail.com>
 
     License
     -------
@@ -38,12 +40,31 @@
         http://www.python.org/psf/license/
 
 """
-__version__ = "1.2"
+__version__ = "1.3"
 
-import calendar
+import sys
 import time
+import calendar
 
+from functools import total_ordering
 from datetime import datetime, date, timedelta
+
+# Python 2 & 3 compatibility
+PY2 = sys.version_info[0] == 2
+PY3 = sys.version_info[0] == 3
+
+def is_string(value):
+    if PY3:
+        return (type(value) is str)
+    else:
+        return isinstance(value, (str, unicode))
+
+def is_number(value):
+    if PY3:
+        return isinstance(value, (float, int))
+    else:
+        return isinstance(value, (float, int, long))
+
 
 class Delta(object):
     """
@@ -107,7 +128,7 @@ class Delta(object):
             self.td = timedelta()
         elif type(td) is timedelta:
             self.td = td
-        elif type(td) in [int, float, long]:
+        elif is_number(td):
             self.td = timedelta(seconds=td)
         else:
             raise ValueError("You must pass a valid timedelta object, number " \
@@ -283,7 +304,7 @@ class Delta(object):
             @rtype: int
             @return: Number of minutes
         """
-        return self.td.seconds % (60 * 60) / 60
+        return self.td.seconds % (60 * 60) // 60
 
     def _set_minutes(self, value):
         """
@@ -327,7 +348,7 @@ class Delta(object):
             @rtype: int
             @return: Number of hours
         """
-        return self.td.seconds / (60 * 60)
+        return self.td.seconds // (60 * 60)
 
     def _set_hours(self, value):
         """
@@ -415,7 +436,7 @@ class Delta(object):
             @rtype: int
             @return: Number of months
         """
-        return self.td.days % 365 / 30
+        return self.td.days % 365 // 30
 
     def _set_months(self, value):
         """
@@ -459,7 +480,7 @@ class Delta(object):
             @rtype: int
             @return: Number of years
         """
-        return self.td.days / 365
+        return self.td.days // 365
 
     def _set_years(self, value):
         """
@@ -492,6 +513,8 @@ class Delta(object):
         """
         return self.td.days / 365.0 + (self.td.seconds / 365.0 / 24.0 / 60.0 / 60.0) + (self.td.microseconds / 1000000.0 / 365.0 / 24.0 / 60.0 / 60.0)
 
+
+@total_ordering
 class Date(object):
     """
         An object representing a date and a time. This object has several
@@ -579,9 +602,9 @@ class Date(object):
         """
         if dt is None:
             self.dt = datetime.now()
-        elif type(dt) in [float, int, long]:
+        elif is_number(dt):
             self.dt = datetime.fromtimestamp(dt)
-        elif type(dt) in [str, unicode]:
+        elif is_string(dt):
             if format is None:
                 raise ValueError("When passing in a string you must also " \
                                  "pass in a format description!")
@@ -686,6 +709,44 @@ class Date(object):
         else:
             raise TypeError("Invalid type!")
 
+    def __lt__(self, value):
+        """
+            Compare to see if this date object is less than another date object.
+
+                >>> Date(12345) > Date(1234)
+                True
+                >>> Date(12345) < Date(1234)
+                False
+                >>> Date(12345) == Date(12345)
+                True
+
+            @rtype: bool
+            @return: True if it is smaller, False if not smaller
+        """
+        if type(value) == Date:
+            return self.dt < value.dt
+        else:
+            raise TypeError("Invalid type!")
+
+    def __eq__(self, value):
+        """
+            Compare to see if this date object is equal to another date object.
+
+                >>> Date(12345) > Date(1234)
+                True
+                >>> Date(12345) < Date(1234)
+                False
+                >>> Date(12345) == Date(12345)
+                True
+
+            @rtype: bool
+            @return: True if equal, False if not
+        """
+        if type(value) == Date:
+            return self.dt == value.dt
+        else:
+            raise TypeError("Invalid type!")
+
     def _get_datetime(self):
         """
             Return a datetime representation of this date/time, as would be
@@ -704,7 +765,7 @@ class Date(object):
             Set the time from a datetime object.
 
                 >>> d = Date(1234567890)
-                >>> d.datetime = datetime(2009, 02, 14)
+                >>> d.datetime = datetime(2009, 2, 14)
                 >>> d
                 Date(2009-02-14, 00:00:00)
 
@@ -916,7 +977,7 @@ class Date(object):
             @return: The currently set week [1, 52]
         """
         delta = self.dt - datetime(self.dt.year, 1, 1)
-        return delta.days / 7
+        return delta.days // 7
 
     def _set_week(self, value):
         """
@@ -1560,7 +1621,7 @@ Here is the behavior of operations with relativedelta:
         if dt1 and dt2:
             if not isinstance(dt1, datetime.date) or \
                not isinstance(dt2, datetime.date):
-                raise TypeError, "relativedelta only diffs datetime/date"
+                raise TypeError("relativedelta only diffs datetime/date")
             if type(dt1) is not type(dt2):
                 if not isinstance(dt1, datetime):
                     dt1 = datetime.fromordinal(dt1.toordinal())
@@ -1640,7 +1701,7 @@ Here is the behavior of operations with relativedelta:
                             self.day = yday-ydayidx[idx-1]
                         break
                 else:
-                    raise ValueError, "invalid year day (%d)" % yday
+                    raise ValueError("invalid year day (%d)" % yday)
 
         self._fix()
 
@@ -1689,7 +1750,7 @@ Here is the behavior of operations with relativedelta:
 
     def __radd__(self, other):
         if not isinstance(other, date):
-            raise TypeError, "unsupported type for add operation"
+            raise TypeError("unsupported type for add operation")
         elif self._has_time and not isinstance(other, datetime):
             other = datetime.fromordinal(other.toordinal())
         year = (self.year or other.year)+self.years
@@ -1735,7 +1796,7 @@ Here is the behavior of operations with relativedelta:
 
     def __add__(self, other):
         if not isinstance(other, relativedelta):
-            raise TypeError, "unsupported type for add operation"
+            raise TypeError("unsupported type for add operation")
         return relativedelta(years=other.years+self.years,
                              months=other.months+self.months,
                              days=other.days+self.days,
@@ -1755,7 +1816,7 @@ Here is the behavior of operations with relativedelta:
 
     def __sub__(self, other):
         if not isinstance(other, relativedelta):
-            raise TypeError, "unsupported type for sub operation"
+            raise TypeError("unsupported type for sub operation")
         return relativedelta(years=other.years-self.years,
                              months=other.months-self.months,
                              days=other.days-self.days,
@@ -1871,7 +1932,7 @@ Here is the behavior of operations with relativedelta:
                      "hour", "minute", "second", "microsecond"]:
             value = getattr(self, attr)
             if value is not None:
-                l.append("%s=%s" % (attr, `value`))
+                l.append("%s=%s" % (attr, repr(value)))
         return "%s(%s)" % (self.__class__.__name__, ", ".join(l))
 
 """
