@@ -2,12 +2,12 @@ from distutils.core import setup
 
 setup(
     name = "paodate",
-    version = "1.2",
+    version = "1.3",
     description = "Easy object-oriented date and time handling for Python",
     long_description = """Overview
 ========
 Utilities for making date and time handling in Python easy. This is mainly
-accomplished with the new Date object which abstracts most of the 
+accomplished with the new Date object which abstracts most of the
 differences between datetime, date, time, timedelta, and relativedelta,
 allowing you to convert freely between all of them and providing useful
 utility methods.
